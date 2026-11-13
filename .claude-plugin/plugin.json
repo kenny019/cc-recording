@@ -1,0 +1,13 @@
+{
+  "name": "recording",
+  "version": "0.1.0",
+  "description": "Turns a screen recording of a call into confirmed, timestamped output for a task you choose: review notes, bug reports, a how-to guide, meeting decisions, or anything you describe. Each item carries the speaker's words and the screen frame behind it.",
+  "author": {
+    "name": "kenny019",
+    "url": "https://github.com/kenny019"
+  },
+  "homepage": "https://github.com/kenny019/cc-recording",
+  "repository": "https://github.com/kenny019/cc-recording",
+  "license": "MIT",
+  "keywords": ["recording", "video", "transcription", "assemblyai", "ffmpeg", "review", "meeting", "docs"]
+}
