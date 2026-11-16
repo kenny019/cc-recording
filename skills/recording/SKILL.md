@@ -1,7 +1,7 @@
 ---
 name: recording
-description: Turn a screen recording of a call into confirmed, timestamped output for a task the user chooses (review notes, bug reports, a how-to guide, meeting decisions, or anything they describe), each item backed by the speaker's words and the screen frame behind it. Use when the user gives a call or screen recording and a task to do with it.
-argument-hint: <video.mp4> [review | bugs | docs | meeting | a task in your own words]
+description: Turn a screen recording or audio recording of a call into confirmed, timestamped output for a task the user chooses (review notes, bug reports, a how-to guide, meeting decisions, or anything they describe), each item backed by the speaker's words and the screen frame behind it when there is video. Use when the user gives a call, screen or audio recording (such as a voice memo) and a task to do with it.
+argument-hint: <video.mp4 | audio.m4a> [review | bugs | docs | meeting | a task in your own words]
 disable-model-invocation: true
 ---
 
@@ -14,7 +14,8 @@ waits for the user's go.
 
 ## The task
 
-Arguments: `$ARGUMENTS`. The first is the video path (ask for it if missing).
+Arguments: `$ARGUMENTS`. The first is the recording path (ask for it if missing):
+a screen recording, or an audio file such as `.m4a`, `.mp3` or `.wav`.
 The rest is the task:
 
 - Nothing: the `review` preset.
@@ -46,6 +47,10 @@ start from that preset and adapt it.
 when the call is about that project; else none. Ask if it matters and is not
 clear.
 
+**Audio only.** When `recording.json` says `"has_video": false`, there is no
+screen. Skip step 3 and leave frames out of the output. The `docs` preset needs
+a screenshot per step, so tell the user and ask for the video or another task.
+
 Each task works in its own folder, `<video name>.recording/<task>/`, where
 `<task>` is the preset name or a short slug of the free-text task. The
 transcript is shared by all tasks on the same video.
@@ -61,7 +66,7 @@ Before running anything, tell the user in one or two lines:
 - The audio track is uploaded to AssemblyAI (US endpoint) for transcription.
   On AssemblyAI's free tier, uploaded audio may be used for model training.
   The transcript is deleted at AssemblyAI as soon as it is saved locally.
-- The video and frames stay on this machine. Frames you look at go to the
+- The recording and frames stay on this machine. Frames you look at go to the
   model as part of this conversation, like any image.
 - If the call shows customer data or private conversations, they should say
   so now. `--region eu` keeps data in the EU and out of training.
@@ -77,7 +82,8 @@ python3 "${CLAUDE_SKILL_DIR}/scripts/prepare.py" "<video>"
 
 Writes to `<video name>.recording/` next to the video (never inside a repo):
 `transcript.json`, `transcript.txt` (`[mm:ss-mm:ss] A: text`), `audio.mp3`
-(when it uploads) and `recording.json` with when the call started and ended.
+(when it uploads) and `recording.json` with when the call started and ended
+and whether it has video (`has_video`).
 It prints how long each speaker talked. Re-running reuses the transcript and
 uploads nothing; if an earlier run could not delete the AssemblyAI copy, it
 retries that delete. Only one run per video at a time: a second one stops
@@ -113,6 +119,8 @@ the quote from 5 s before `t` to 90 s after and moves to the second it was
 said, so keep the quote distinctive.
 
 ## 3. Look at the screen
+
+Skip this step for an audio-only recording.
 
 ```bash
 python3 "${CLAUDE_SKILL_DIR}/scripts/frames.py" "<video>" "<task folder>/candidates.json"

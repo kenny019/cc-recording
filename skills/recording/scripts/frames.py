@@ -203,8 +203,11 @@ def main():
     if not words:
         print("no transcript.json with word timings found; using t as given")
 
-    w, h = (int(v) for v in run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries",
-                                 "stream=width,height", "-of", "csv=p=0", str(video)]).decode().strip().split(","))
+    size = run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries",
+                "stream=width,height", "-of", "csv=p=0", str(video)]).decode().strip()
+    if not size:
+        fail(f"{video.name} has no video track, so there are no frames. Skip this step for an audio-only recording.")
+    w, h = (int(v) for v in size.split(","))
     global SH
     SH = max(2, round(SW * h / w / 2) * 2)  # same aspect as the video, even for ffmpeg
     sx, sy = w / SW, h / SH

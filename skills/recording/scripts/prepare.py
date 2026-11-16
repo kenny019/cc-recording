@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Extract a recording's audio and transcribe it with AssemblyAI.
 
+The recording is a screen recording or an audio file (.m4a, .mp3, .wav, ...).
+
 Writes <out>/audio.mp3, <out>/transcript.json and <out>/transcript.txt, then
 deletes the transcript at AssemblyAI so the local copy is the only one.
 Re-running reuses the local transcript and uploads nothing, and retries the
@@ -51,6 +53,17 @@ def probe_duration(video):
     if out.returncode != 0:
         fail(f"ffprobe could not read {video}: {out.stderr.strip()}")
     return float(out.stdout.strip())
+
+
+def has_video(path):
+    """True when the file has a picture to pull frames from. Cover art attached
+    to an audio file is a still image, not a recording of the screen."""
+    out = subprocess.run(
+        ["ffprobe", "-v", "error", "-select_streams", "v", "-show_entries", "stream_disposition=attached_pic",
+         "-of", "csv=p=0", str(path)],
+        capture_output=True, text=True,
+    ).stdout.split()
+    return "0" in out
 
 
 def call_start(video, duration):
@@ -170,9 +183,11 @@ def run(held):
     held.append(lock(out))  # released by main() when the run ends, failed or not
     duration = probe_duration(video)
     start, source = call_start(video, duration)
-    print(f"video: {video.name}, {duration / 60:.1f} min, started {start:%Y-%m-%d %H:%M %Z} ({source})")
+    picture = has_video(video)
+    kind = "video" if picture else "audio only"
+    print(f"{kind}: {video.name}, {duration / 60:.1f} min, started {start:%Y-%m-%d %H:%M %Z} ({source})")
     write_atomic(out / "recording.json", json.dumps({
-        "video": str(video), "duration_s": round(duration, 1),
+        "video": str(video), "has_video": picture, "duration_s": round(duration, 1),
         "start": start.isoformat(timespec="seconds"), "start_source": source,
         "end": (start + datetime.timedelta(seconds=duration)).isoformat(timespec="seconds"),
     }, indent=1))

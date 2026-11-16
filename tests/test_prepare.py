@@ -128,6 +128,20 @@ class Prepare(unittest.TestCase):
         self.assertIn(info["start_source"], ("creation_time tag", "file creation time", "file modified time minus duration"))
         self.assertLess(info["start"], info["end"])
 
+    def test_audio_only_recording(self):
+        self.video = self.dir / "memo.m4a"
+        self.out = self.dir / "memo.recording"
+        subprocess.run(["ffmpeg", "-v", "error", "-f", "lavfi", "-i", "sine=d=1", str(self.video)], check=True)
+        code, out = self.run_prepare()
+        self.assertEqual(code, 0, out)
+        self.assertTrue((self.out / "transcript.txt").is_file())
+        self.assertFalse(json.loads((self.out / "recording.json").read_text())["has_video"])
+
+    def test_screen_recording_has_video(self):
+        code, out = self.run_prepare()
+        self.assertEqual(code, 0, out)
+        self.assertTrue(json.loads((self.out / "recording.json").read_text())["has_video"])
+
     def test_keep_remote_never_deletes(self):
         self.run_prepare("--keep-remote")
         self.run_prepare()

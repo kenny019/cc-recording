@@ -1,6 +1,6 @@
 # cc-recording
 
-A Claude Code plugin that turns a screen recording of a call into confirmed,
+A Claude Code plugin that turns a screen or audio recording of a call into confirmed,
 timestamped output for a task you choose. Every item it produces carries a
 timestamp, the words behind it and the screen frame that was showing. Unclear
 points are asked, not guessed, and nothing touches a repo or gets sent until
@@ -23,7 +23,7 @@ run Claude from).
 ## Use
 
 ```
-/recording <video> [preset or task]
+/recording <video or audio file> [preset or task]
 ```
 
 | Task | For | You get | On "go" |
@@ -42,6 +42,7 @@ Examples:
 /recording ~/Movies/onboarding.mp4 bugs the tester's first session
 /recording ~/Movies/demo.mp4 docs for new coaches
 /recording ~/Movies/sales.mp4 list every question the client asked about pricing
+/recording ~/Desktop/standup.m4a meeting
 ```
 
 How it works:
@@ -58,7 +59,10 @@ How it works:
 5. **Write the output** and stop.
 6. **Go.** Only when you say so.
 
-Everything for a run is saved next to the video, in
+An audio file (`.m4a`, `.mp3`, `.wav`, a voice memo) works the same way
+without step 3. Items carry no frame, and `docs` needs a video.
+
+Everything for a run is saved next to the recording, in
 `<video name>.recording/<task>/`, never inside a repo. Several tasks on the
 same video share one transcript.
 
@@ -68,7 +72,7 @@ same video share one transcript.
   uploaded audio may be used for model training. Pass `--region eu` to
   `prepare.py` (or ask Claude to) to keep data in the EU and out of training,
   per [AssemblyAI's docs](https://www.assemblyai.com/docs/data-retention-and-model-training).
-- The **video and frames** stay local. Frames Claude looks at are sent to the
+- The **recording and frames** stay local. Frames Claude looks at are sent to the
   model as part of the conversation, like any image.
 - If a call shows customer data or private conversations, decide before running
   it whether that is acceptable. The `bugs` and `docs` tasks list frames with

@@ -11,8 +11,8 @@
     {
       "name": "recording",
       "source": "./",
-      "description": "Turns a screen recording of a call into confirmed, timestamped output for a task you choose: review notes, bug reports, a how-to guide, meeting decisions, or anything you describe.",
-      "version": "0.1.0"
+      "description": "Turns a screen or audio recording of a call into confirmed, timestamped output for a task you choose: review notes, bug reports, a how-to guide, meeting decisions, or anything you describe.",
+      "version": "0.2.0"
     }
   ]
 }

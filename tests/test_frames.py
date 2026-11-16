@@ -52,6 +52,18 @@ class Helpers(unittest.TestCase):
 
 @unittest.skipUnless(shutil.which("ffmpeg"), "needs ffmpeg")
 class EndToEnd(unittest.TestCase):
+    def test_audio_only_recording_stops_with_a_message(self):
+        with tempfile.TemporaryDirectory() as d:
+            d = pathlib.Path(d)
+            memo = d / "memo.m4a"
+            subprocess.run(["ffmpeg", "-v", "error", "-f", "lavfi", "-i", "sine=d=1", str(memo)], check=True)
+            (d / "candidates.json").write_text(json.dumps([{"id": "n01", "t": "00:00"}]))
+            r = subprocess.run([sys.executable, str(SCRIPTS / "frames.py"), str(memo), str(d / "candidates.json")],
+                               capture_output=True, text=True)
+            self.assertNotEqual(r.returncode, 0)
+            self.assertIn("no video", r.stderr)
+            self.assertNotIn("Traceback", r.stderr)
+
     def test_finds_selection_and_ignores_pale_tile(self):
         with tempfile.TemporaryDirectory() as d:
             d = pathlib.Path(d)
